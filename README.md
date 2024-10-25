@@ -1,46 +1,123 @@
-# Getting Started with Create React App
+# Task Planner Application
 
-This project was bootstrapped with [Create React App](https://github.com/facebook/create-react-app).
+A dynamic calendar-based task management application built with React, TypeScript, and styled using Tailwind CSS.
 
-## Available Scripts
+## 🚀 Features
 
-In the project directory, you can run:
+- Interactive Month and Week views
+- Drag-and-drop task management
+- Real-time task updates
+- Dark mode support
+- Keyboard shortcuts
+- Priority-based task categorization
 
-### `npm start`
+## 🛠️ Technologies Used
 
-Runs the app in the development mode.\
-Open [http://localhost:3000](http://localhost:3000) to view it in the browser.
+- **Frontend Framework**: React 18 with TypeScript
+- **Styling**: Tailwind CSS
+- **State Management**: React in-built state management
+- **Animations**: Framer Motion
+- **Date Handling**: date-fns
+- **Icons**: Lucide React
+- **Type Checking**: TypeScript
+- **Code Formatting**: Prettier
+- **Linting**: ESLint
 
-The page will reload if you make edits.\
-You will also see any lint errors in the console.
+## 📋 Prerequisites
 
-### `npm test`
+- Node.js (v18 or higher)
+- npm
 
-Launches the test runner in the interactive watch mode.\
-See the section about [running tests](https://facebook.github.io/create-react-app/docs/running-tests) for more information.
+## 🏗️ Installation
 
-### `npm run build`
+1. Clone the repository:
 
-Builds the app for production to the `build` folder.\
-It correctly bundles React in production mode and optimizes the build for the best performance.
+   ```bash
+   git clone https://github.com/Eren-Jager/task-planner.git
+   cd task-planner
+   ```
 
-The build is minified and the filenames include the hashes.\
-Your app is ready to be deployed!
+2. Install dependencies:
 
-See the section about [deployment](https://facebook.github.io/create-react-app/docs/deployment) for more information.
+   ```bash
+   npm install
+   ```
 
-### `npm run eject`
+3. Start the development server:
 
-**Note: this is a one-way operation. Once you `eject`, you can’t go back!**
+   ```bash
+   npm start
+   ```
 
-If you aren’t satisfied with the build tool and configuration choices, you can `eject` at any time. This command will remove the single build dependency from your project.
+4. Open [http://localhost:3000](http://localhost:3000) in your browser.
 
-Instead, it will copy all the configuration files and the transitive dependencies (webpack, Babel, ESLint, etc) right into your project so you have full control over them. All of the commands except `eject` will still work, but they will point to the copied scripts so you can tweak them. At this point you’re on your own.
+## 🏛️ Architecture
 
-You don’t have to ever use `eject`. The curated feature set is suitable for small and middle deployments, and you shouldn’t feel obligated to use this feature. However we understand that this tool wouldn’t be useful if you couldn’t customize it when you are ready for it.
+The application follows a component-based architecture with the following main structure:
 
-## Learn More
+```
+/src
+│   ├── components
+│   │   ├── MonthView
+│   │   │   └── MonthView.tsx
+│   │   ├── WeekView
+│   │   │   ├── DayColumn.tsx
+│   │   │   ├── TaskItem.tsx
+│   │   │   ├── TimeColumn.tsx
+│   │   │   ├── TimeSlot.tsx
+│   │   │   ├── WeekGrid.tsx
+│   │   │   ├── WeekHeader.tsx
+│   │   │   ├── WeekView.tsx
+│   │   ├── AccessibilityProvider.tsx
+│   │   ├── AddTaskModal.tsx
+│   │   ├── CalendarHeader.tsx
+│   │   ├── EditTaskModal.tsx
+│   │   ├── KeyboardShortcuts.tsx
+│   │   ├── SearchFilter.tsx
+│   ├── config
+│   │   └── theme.ts
+│   ├── hooks
+│   │   └── useTaskPlanner.ts
+│   ├── pages
+│   │   └── TaskPlannerPage.tsx
+│   ├── services
+│   │   └── storageService.ts
+│   ├── types
+│   │   └── index.ts
+│   ├── utils
+│   │   └── transitions.ts
+├── App.css
+├── App.test.tsx
+├── App.tsx
+├── index.css
+├── index.tsx
+```
 
-You can learn more in the [Create React App documentation](https://facebook.github.io/create-react-app/docs/getting-started).
+### Key Components
 
-To learn React, check out the [React documentation](https://reactjs.org/).
+- **TaskPlanner**: Main component orchestrating the entire application
+- **MonthView/WeekView**: Calendar view components
+- **TaskItem**: Reusable task component
+- **AddTaskModal/EditTaskModal**: Task management modals
+
+### State Management
+
+- Uses React Context for global state management
+- Implements custom hooks for business logic
+- Maintains theme consistency across components
+
+### Keyboard Shortcuts
+
+- `Alt + →`: Next period
+- `Alt + ←`: Previous period
+- `Alt + V`: Toggle view (Month/Week)
+- `Alt + T`: Today
+- `Alt + N`: New task
+- `Alt + D`: Toggle dark mode
+
+### Task Management
+
+- Click on any time slot to add a task
+- Drag and drop tasks to reschedule
+- Click on a task to edit
+- Use checkboxes to mark tasks as complete
