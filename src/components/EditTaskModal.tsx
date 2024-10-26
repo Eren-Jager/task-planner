@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Task, Theme } from '../types';
+import { NewTaskData, Task, Theme } from '../types';
 
 interface EditTaskModalProps {
   task: Task | null;
@@ -187,21 +187,33 @@ const EditTaskModal: React.FC<EditTaskModalProps> = ({
             >
               Priority
             </label>
-            <select
-              id="task-priority"
-              value={formData.priority || 'medium'}
-              onChange={(e) =>
-                setFormData((prev) => ({
-                  ...prev,
-                  priority: e.target.value as Task['priority'],
-                }))
-              }
-              className={textEditorClasses}
-            >
-              <option value="low">Low</option>
-              <option value="medium">Medium</option>
-              <option value="high">High</option>
-            </select>
+            <div className="relative">
+              <select
+                id="task-priority"
+                value={formData.priority || 'medium'}
+                onChange={(e) =>
+                  setFormData((prev) => ({
+                    ...prev,
+                    priority: e.target.value as NewTaskData['priority'],
+                  }))
+                }
+                className={`${textEditorClasses} pl-8`}
+              >
+                <option value="low">Low</option>
+                <option value="medium">Medium</option>
+                <option value="high">High</option>
+              </select>
+              <div
+                className={`absolute left-2 top-1/2 -translate-y-1/2 w-3 h-3 rounded-full ${
+                  formData.priority === 'low'
+                    ? 'bg-blue-500'
+                    : formData.priority === 'medium'
+                      ? 'bg-yellow-500'
+                      : 'bg-red-500'
+                }`}
+                aria-hidden="true"
+              />
+            </div>
           </div>
         </div>
 
