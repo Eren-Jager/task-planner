@@ -1,0 +1,18 @@
+{
+    "printWidth": 80,
+    "tabWidth": 2,
+    "singleQuote": true,
+    "semi": true,
+    "importOrder": [
+        "^react",
+        "^next",
+        "<THIRD_PARTY_MODULES>",
+        "^@/components/(.*)$",
+        "^@/hooks/(.*)$",
+        "^@/utils/(.*)$",
+        "^@/(.*)$",
+        "^[./]"
+    ],
+    "importOrderSeparation": true,
+    "importOrderSortSpecifiers": true
+}

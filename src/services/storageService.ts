@@ -1,4 +1,5 @@
 import { Task } from '../types';
+import { updateTaskStatus } from '../utils/utils';
 
 const STORAGE_KEY = 'task-planner-data';
 
@@ -19,7 +20,7 @@ export class StorageService {
       if (!tasksString) return [];
 
       const tasks = JSON.parse(tasksString);
-      return tasks;
+      return updateTaskStatus(tasks);
     } catch (error) {
       console.error('Error loading tasks:', error);
       return [];

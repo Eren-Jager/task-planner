@@ -9,6 +9,7 @@ import {
   isSameDay,
 } from 'date-fns';
 import { Task, Theme } from '../../types';
+import { getStatusClasses } from '../../utils/utils';
 
 interface CalendarViewProps {
   currentDate: Date;
@@ -82,7 +83,11 @@ const MonthView: React.FC<CalendarViewProps> = ({
                   ? 'bg-white/10'
                   : 'bg-gray-200'
             } ${
-              isSameDay(new Date(), day) ? 'border-blue-400' : theme.border
+              isSameDay(new Date(), day)
+                ? theme.isDarkMode
+                  ? 'border-white'
+                  : 'border-blue-800'
+                : theme.border
             } transition-colors duration-200`}
             onDragOver={(e) => e.preventDefault()}
             onDrop={() => onDrop(dateStr)}
@@ -119,26 +124,17 @@ const MonthView: React.FC<CalendarViewProps> = ({
                   draggable
                   onDragStart={() => onDragStart(task)}
                   onClick={() => onEditTask(task)}
-                  className={`p-1 text-sm rounded cursor-pointer group ${
-                    task.completed
-                      ? !theme.isDarkMode
-                        ? 'bg-green-100'
-                        : 'bg-green-900/50'
-                      : !theme.isDarkMode
-                        ? 'bg-blue-100'
-                        : 'bg-blue-900/50'
-                  } border-l-4 ${
+                  className={`p-1 text-sm rounded cursor-pointer group ${getStatusClasses(
+                    task.status,
+                    theme.isDarkMode,
+                  )} border-l-4 ${
                     task.priority === 'high'
                       ? `border-red-500 ${theme.isDarkMode && 'border-red-400'}`
                       : task.priority === 'medium'
-                        ? `border-yellow-500 ${
-                            theme.isDarkMode && 'border-yellow-400'
-                          }`
-                        : `border-green-500 ${
-                            theme.isDarkMode && 'border-green-400'
-                          }`
+                        ? `border-yellow-500 ${theme.isDarkMode && 'border-yellow-400'}`
+                        : `border-green-500 ${theme.isDarkMode && 'border-green-400'}`
                   } hover:opacity-80 transition-opacity`}
-                  aria-label={`${task.title}, Priority: ${task.priority}`}
+                  aria-label={`${task.title}, Priority: ${task.priority}, Status: ${task.status}`}
                 >
                   <div className="flex items-center gap-1">
                     <input

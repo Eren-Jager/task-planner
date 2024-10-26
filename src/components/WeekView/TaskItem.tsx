@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { motion } from 'framer-motion';
 import { Task, Theme } from '../../types';
+import { getStatusClasses } from '../../utils/utils';
 
 interface TaskItemProps {
   task: Task;
@@ -52,23 +53,14 @@ const TaskItem: React.FC<TaskItemProps> = ({
         boxShadow: '0 4px 8px rgba(0,0,0,0.08)',
       }}
       transition={{ duration: 0.2, ease: 'easeInOut' }}
-      className={`absolute rounded-lg shadow-sm border-l-4 ${
-        task.completed
-          ? `bg-green-100 border-green-500 ${
-              theme.isDarkMode && 'dark:bg-green-900 dark:border-green-500'
-            }`
-          : task.priority === 'high'
-            ? `bg-red-100 border-red-500 ${
-                theme.isDarkMode && 'dark:bg-red-900 dark:border-red-500'
+      className={`absolute rounded-lg shadow-sm border-l-4 ${getStatusClasses(task.status, theme.isDarkMode)} ${
+        task.priority === 'high'
+          ? `border-red-500 ${theme.isDarkMode && 'dark:border-red-500'}`
+          : task.priority === 'medium'
+            ? `border-yellow-500 ${
+                theme.isDarkMode && 'dark:border-yellow-500'
               }`
-            : task.priority === 'medium'
-              ? `bg-yellow-100 border-yellow-500 ${
-                  theme.isDarkMode &&
-                  'dark:bg-yellow-900 dark:border-yellow-500'
-                }`
-              : `bg-blue-100 border-blue-500 ${
-                  theme.isDarkMode && 'dark:bg-blue-900 dark:border-blue-500'
-                }`
+            : `border-blue-500 ${theme.isDarkMode && 'dark:border-blue-500'}`
       } cursor-move group transition-all duration-200 ${
         isDragging ? 'opacity-50 ring-2 ring-blue-500 dark:ring-blue-400' : ''
       }`}

@@ -152,8 +152,9 @@ const EditTaskModal: React.FC<EditTaskModalProps> = ({
               </label>
               <input
                 id="task-due-date"
-                type="datetime-local"
+                type="date"
                 value={formData.dueDate || ''}
+                min={formData.taskDate}
                 onChange={(e) =>
                   setFormData((prev) => ({ ...prev, dueDate: e.target.value }))
                 }

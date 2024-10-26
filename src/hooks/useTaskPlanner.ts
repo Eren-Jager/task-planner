@@ -1,6 +1,8 @@
 import { useState, useEffect } from 'react';
 import { Task, TaskFilters } from '../types';
 import { StorageService } from '../services/storageService';
+import { getTaskStatus } from '../utils/utils';
+import { format } from 'date-fns';
 
 export const useTaskPlanner = () => {
   const [tasks, setTasks] = useState<Task[]>([]);
@@ -40,18 +42,18 @@ export const useTaskPlanner = () => {
     setFilteredTasks(filtered);
   }, [tasks, searchTerm, filters]);
 
-  const addTask = (taskData: Partial<Task>) => {
+  const addTask = (taskData: Task) => {
     const newTask: Task = {
       id: Date.now().toString(),
       title: taskData.title || '',
       description: taskData.description || '',
       taskDate: taskData.taskDate || '',
       time: taskData.time,
-      dueDate: taskData.dueDate || taskData.taskDate || '',
+      dueDate: taskData.dueDate || '',
       completed: false,
       createdAt: new Date().toISOString(),
       updatedAt: new Date().toISOString(),
-      status: 'upcoming',
+      status: getTaskStatus(taskData),
       priority: taskData.priority || 'medium',
     };
     setTasks((prev) => {
@@ -62,17 +64,48 @@ export const useTaskPlanner = () => {
     return true;
   };
 
+  const computeTaskUpdates = (task: Task, updates: Partial<Task>): Task => {
+    const updatedTask = {
+      ...task,
+      ...updates,
+      updatedAt: new Date().toISOString(),
+    };
+
+    const taskDueDate = updatedTask.dueDate
+      ? format(
+          new Date(
+            Math.max(
+              new Date(updatedTask.taskDate).getTime(),
+              new Date(updatedTask.dueDate).getTime(),
+            ),
+          ),
+          'yyyy-MM-dd',
+        )
+      : '';
+
+    updatedTask.dueDate = taskDueDate;
+    updatedTask.status = getTaskStatus(updatedTask);
+
+    return updatedTask;
+  };
+
   const updateTask = (taskId: string, updates: Partial<Task>) => {
-    setTasks((prev) => {
-      const newTaskList = prev.map((task) =>
-        task.id === taskId
-          ? { ...task, ...updates, updatedAt: new Date().toISOString() }
-          : task,
-      );
-      StorageService.saveTasks(newTaskList);
-      return newTaskList;
-    });
-    return true;
+    try {
+      setTasks((prev) => {
+        if (!prev.some((task) => task.id === taskId)) {
+          return prev;
+        }
+
+        const newTaskList = prev.map((task) =>
+          task.id === taskId ? computeTaskUpdates(task, updates) : task,
+        );
+
+        StorageService.saveTasks(newTaskList);
+        return newTaskList;
+      });
+    } catch (error) {
+      console.error('Failed to update task:', error);
+    }
   };
 
   const deleteTask = (taskId: string) => {

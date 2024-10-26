@@ -1,17 +1,18 @@
-import React, { useEffect, useState, useCallback } from "react";
-import { AnimatePresence, motion } from "framer-motion";
-import AddTaskModal from "../components/AddTaskModal";
-import CalendarHeader from "../components/CalendarHeader";
-import EditTaskModal from "../components/EditTaskModal";
-import KeyboardShortcuts from "../components/KeyboardShortcuts";
-import SearchFilter from "../components/SearchFilter";
-import WeekView from "../components/WeekView/WeekView";
-import { useTaskPlanner } from "../hooks/useTaskPlanner";
-import { NewTaskData, Task } from "../types";
-import { format, addDays } from "date-fns";
-import { theme } from "../config/theme";
-import MonthView from "../components/MonthView/MonthView";
-import { pageVariants } from "../utils/transitions";
+import React, { useEffect, useState, useCallback } from 'react';
+import { AnimatePresence, motion } from 'framer-motion';
+import AddTaskModal from '../components/AddTaskModal';
+import CalendarHeader from '../components/CalendarHeader';
+import EditTaskModal from '../components/EditTaskModal';
+import KeyboardShortcuts from '../components/KeyboardShortcuts';
+import SearchFilter from '../components/SearchFilter';
+import WeekView from '../components/WeekView/WeekView';
+import { useTaskPlanner } from '../hooks/useTaskPlanner';
+import { NewTaskData, Task } from '../types';
+import { format, addDays } from 'date-fns';
+import { theme } from '../config/theme';
+import MonthView from '../components/MonthView/MonthView';
+import { pageVariants } from '../utils/transitions';
+import { getTaskStatus } from '../utils/utils';
 
 const TaskPlanner: React.FC = () => {
   const {
@@ -25,41 +26,41 @@ const TaskPlanner: React.FC = () => {
     toggleDarkMode,
   } = useTaskPlanner();
 
-  const currentTheme = theme[isDarkMode ? "dark" : "light"];
+  const currentTheme = theme[isDarkMode ? 'dark' : 'light'];
   const [currentDate, setCurrentDate] = useState(new Date());
   const [isMonthView, setIsMonthView] = useState(true);
   const [draggedTask, setDraggedTask] = useState<Task | null>(null);
   const [isAddingTask, setIsAddingTask] = useState(false);
   const [editingTask, setEditingTask] = useState<Task | null>(null);
-  const [newTaskDate, setNewTaskDate] = useState("");
-  const [newTaskTime, setNewTaskTime] = useState("");
+  const [newTaskDate, setNewTaskDate] = useState('');
+  const [newTaskTime, setNewTaskTime] = useState('');
 
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
       if (e.altKey) {
         switch (e.code) {
-          case "ArrowRight":
+          case 'ArrowRight':
             e.preventDefault();
             nextPeriod();
             break;
-          case "ArrowLeft":
+          case 'ArrowLeft':
             e.preventDefault();
             prevPeriod();
             break;
-          case "KeyV":
+          case 'KeyV':
             e.preventDefault();
             handleViewChange(!isMonthView);
             break;
-          case "KeyT":
+          case 'KeyT':
             e.preventDefault();
             setCurrentDate(new Date());
             break;
-          case "KeyN":
+          case 'KeyN':
             e.preventDefault();
-            setNewTaskDate(format(new Date(), "yyyy-MM-dd"));
+            setNewTaskDate(format(new Date(), 'yyyy-MM-dd'));
             setIsAddingTask(true);
             break;
-          case "KeyD":
+          case 'KeyD':
             e.preventDefault();
             toggleDarkMode();
             break;
@@ -67,15 +68,15 @@ const TaskPlanner: React.FC = () => {
       }
     };
 
-    window.addEventListener("keydown", handleKeyDown);
-    return () => window.removeEventListener("keydown", handleKeyDown);
+    window.addEventListener('keydown', handleKeyDown);
+    return () => window.removeEventListener('keydown', handleKeyDown);
   }, []);
 
   const nextPeriod = useCallback(() => {
     setCurrentDate((prevDate) =>
       isMonthView
         ? new Date(prevDate.getFullYear(), prevDate.getMonth() + 1, 1)
-        : addDays(prevDate, 7)
+        : addDays(prevDate, 7),
     );
   }, [isMonthView]);
 
@@ -83,13 +84,13 @@ const TaskPlanner: React.FC = () => {
     setCurrentDate((prevDate) =>
       isMonthView
         ? new Date(prevDate.getFullYear(), prevDate.getMonth() - 1, 1)
-        : addDays(prevDate, -7)
+        : addDays(prevDate, -7),
     );
   }, [isMonthView]);
 
   const handleAddTask = (date: string, time?: string) => {
     setNewTaskDate(date);
-    setNewTaskTime(time || "");
+    setNewTaskTime(time || '');
     setIsAddingTask(true);
   };
 
@@ -97,20 +98,20 @@ const TaskPlanner: React.FC = () => {
     const newTask: Task = {
       id: Date.now().toString(),
       title: taskData.title,
-      description: taskData.description || "",
+      description: taskData.description || '',
       taskDate: newTaskDate,
       time: newTaskTime || taskData.time,
-      dueDate: taskData.dueDate || newTaskDate,
+      dueDate: taskData.dueDate || '',
       completed: false,
       createdAt: new Date().toISOString(),
       updatedAt: new Date().toISOString(),
-      status: "upcoming",
-      priority: taskData.priority || "medium",
+      status: getTaskStatus(taskData),
+      priority: taskData.priority || 'medium',
     };
 
     addTask(newTask);
     setIsAddingTask(false);
-    setNewTaskTime("");
+    setNewTaskTime('');
   };
 
   const handleViewChange = (isMonth: boolean) => {
@@ -124,7 +125,7 @@ const TaskPlanner: React.FC = () => {
         updateTask(taskId, { ...task, completed: !task.completed });
       }
     },
-    [tasks, updateTask]
+    [tasks, updateTask],
   );
 
   return (
@@ -145,11 +146,11 @@ const TaskPlanner: React.FC = () => {
             <button
               onClick={toggleDarkMode}
               className={`p-2 rounded-lg hover:bg-blue-700 ${
-                currentTheme.isDarkMode && "hover:bg-blue-900"
+                currentTheme.isDarkMode && 'hover:bg-blue-900'
               } transition-colors duration-200`}
-              aria-label={`Switch to ${isDarkMode ? "light" : "dark"} mode`}
+              aria-label={`Switch to ${isDarkMode ? 'light' : 'dark'} mode`}
             >
-              {isDarkMode ? "🌞" : "🌙"}
+              {isDarkMode ? '🌞' : '🌙'}
             </button>
           </div>
         </div>
@@ -175,13 +176,13 @@ const TaskPlanner: React.FC = () => {
           <AnimatePresence mode="wait" initial={false}>
             {isMonthView ? (
               <motion.div
-                key={format(currentDate, "yyyy-MM")}
+                key={format(currentDate, 'yyyy-MM')}
                 variants={pageVariants}
                 initial="enter"
                 animate="in"
                 exit="out"
                 aria-live="polite"
-                aria-label={`Displaying tasks for ${format(currentDate, "MMMM yyyy")}`}
+                aria-label={`Displaying tasks for ${format(currentDate, 'MMMM yyyy')}`}
               >
                 <MonthView
                   currentDate={currentDate}
@@ -206,13 +207,13 @@ const TaskPlanner: React.FC = () => {
               </motion.div>
             ) : (
               <motion.div
-                key={format(currentDate, "yyyy-MM-dd")}
+                key={format(currentDate, 'yyyy-MM-dd')}
                 variants={pageVariants}
                 initial="enter"
                 animate="in"
                 exit="out"
                 aria-live="polite"
-                aria-label={`Displaying tasks for the week of ${format(currentDate, "MMM d, yyyy")}`}
+                aria-label={`Displaying tasks for the week of ${format(currentDate, 'MMM d, yyyy')}`}
               >
                 <WeekView
                   currentDate={currentDate}
