@@ -1,6 +1,7 @@
 import React, { useState, useRef, useEffect } from 'react';
 import { Search, Filter } from 'lucide-react';
 import { TaskFilters, TaskStatus, TaskPriority } from '../types';
+import { getPriorityColors, getStatusClasses } from '../utils/utils';
 
 interface SearchFilterProps {
   onSearch: (term: string) => void;
@@ -16,6 +17,8 @@ const SearchFilter: React.FC<SearchFilterProps> = ({
   const [isFilterOpen, setIsFilterOpen] = useState(false);
   const filterRef = useRef<HTMLDivElement>(null);
   const [filters, setFilters] = useState<TaskFilters>({});
+
+  const priorityColors = getPriorityColors(theme.isDarkMode);
 
   useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {
@@ -103,25 +106,31 @@ const SearchFilter: React.FC<SearchFilterProps> = ({
                 {statusOptions.map((status) => (
                   <label
                     key={status}
-                    className="flex items-center space-x-2 mb-2"
+                    className={`flex items-center space-x-2 mb-2 cursor-pointer  p-1 rounded ${theme.hover}`}
                   >
-                    <input
-                      type="checkbox"
-                      checked={filters.status?.includes(status)}
-                      onChange={(e) => {
-                        const currentStatus = filters.status || [];
-                        updateFilters({
-                          status: e.target.checked
-                            ? [...currentStatus, status]
-                            : currentStatus.filter((s) => s !== status),
-                        });
-                      }}
-                      className="rounded border-gray-300"
-                      aria-checked={filters.status?.includes(status)}
+                    <div className="flex items-center flex-1">
+                      <input
+                        type="checkbox"
+                        checked={filters.status?.includes(status)}
+                        onChange={(e) => {
+                          const currentStatus = filters.status || [];
+                          updateFilters({
+                            status: e.target.checked
+                              ? [...currentStatus, status]
+                              : currentStatus.filter((s) => s !== status),
+                          });
+                        }}
+                        className="rounded border-gray-300"
+                        aria-checked={filters.status?.includes(status)}
+                      />
+                      <span className="ml-2">
+                        {status.charAt(0).toUpperCase() + status.slice(1)}
+                      </span>
+                    </div>
+                    <div
+                      className={`w-4 h-4 rounded border ${getStatusClasses(status, theme.isDarkMode)}`}
+                      aria-hidden="true"
                     />
-                    <span>
-                      {status.charAt(0).toUpperCase() + status.slice(1)}
-                    </span>
                   </label>
                 ))}
               </div>
@@ -131,25 +140,31 @@ const SearchFilter: React.FC<SearchFilterProps> = ({
                 {priorityOptions.map((priority) => (
                   <label
                     key={priority}
-                    className="flex items-center space-x-2 mb-2"
+                    className={`flex items-center space-x-2 mb-2 cursor-pointer p-1 rounded ${theme.hover}`}
                   >
-                    <input
-                      type="checkbox"
-                      checked={filters.priority?.includes(priority)}
-                      onChange={(e) => {
-                        const currentPriority = filters.priority || [];
-                        updateFilters({
-                          priority: e.target.checked
-                            ? [...currentPriority, priority]
-                            : currentPriority.filter((p) => p !== priority),
-                        });
-                      }}
-                      className="rounded border-gray-300"
-                      aria-checked={filters.priority?.includes(priority)}
+                    <div className="flex items-center flex-1">
+                      <input
+                        type="checkbox"
+                        checked={filters.priority?.includes(priority)}
+                        onChange={(e) => {
+                          const currentPriority = filters.priority || [];
+                          updateFilters({
+                            priority: e.target.checked
+                              ? [...currentPriority, priority]
+                              : currentPriority.filter((p) => p !== priority),
+                          });
+                        }}
+                        className="rounded border-gray-300"
+                        aria-checked={filters.priority?.includes(priority)}
+                      />
+                      <span className="ml-2">
+                        {priority.charAt(0).toUpperCase() + priority.slice(1)}
+                      </span>
+                    </div>
+                    <div
+                      className={`w-4 h-4 rounded border-l-4 ${priorityColors[priority]}`}
+                      aria-hidden="true"
                     />
-                    <span>
-                      {priority.charAt(0).toUpperCase() + priority.slice(1)}
-                    </span>
                   </label>
                 ))}
               </div>

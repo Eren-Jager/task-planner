@@ -1,12 +1,12 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback, useMemo } from 'react';
 import { Task, TaskFilters } from '../types';
 import { StorageService } from '../services/storageService';
 import { getTaskStatus } from '../utils/utils';
 import { format } from 'date-fns';
+import { v4 as uuidv4 } from 'uuid';
 
 export const useTaskPlanner = () => {
   const [tasks, setTasks] = useState<Task[]>([]);
-  const [filteredTasks, setFilteredTasks] = useState<Task[]>([]);
   const [searchTerm, setSearchTerm] = useState('');
   const [filters, setFilters] = useState<TaskFilters>({});
   const [isDarkMode, setIsDarkMode] = useState(false);
@@ -16,110 +16,107 @@ export const useTaskPlanner = () => {
     setIsDarkMode(StorageService.loadTheme());
   }, []);
 
-  useEffect(() => {
-    let filtered = [...tasks];
-
-    if (searchTerm) {
-      filtered = filtered.filter(
-        (task) =>
-          task.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
-          task.description.toLowerCase().includes(searchTerm.toLowerCase()),
-      );
-    }
-
-    if (filters.status?.length) {
-      filtered = filtered.filter((task) =>
-        filters.status?.includes(task.status),
-      );
-    }
-
-    if (filters.priority?.length) {
-      filtered = filtered.filter((task) =>
-        filters.priority?.includes(task.priority),
-      );
-    }
-
-    setFilteredTasks(filtered);
-  }, [tasks, searchTerm, filters]);
-
-  const addTask = (taskData: Task) => {
+  const addTask = useCallback((taskData: Partial<Task>): boolean => {
     const newTask: Task = {
-      id: Date.now().toString(),
+      id: uuidv4(),
       title: taskData.title || '',
       description: taskData.description || '',
       taskDate: taskData.taskDate || '',
-      time: taskData.time,
+      time: taskData.time || '09:00',
       dueDate: taskData.dueDate || '',
       completed: false,
       createdAt: new Date().toISOString(),
       updatedAt: new Date().toISOString(),
-      status: getTaskStatus(taskData),
+      status: getTaskStatus(taskData as Task),
       priority: taskData.priority || 'medium',
     };
-    setTasks((prev) => {
-      const newTaskList = [...prev, newTask];
-      StorageService.saveTasks(newTaskList);
-      return newTaskList;
+
+    setTasks((prevTasks) => {
+      const newTasks = [...prevTasks, newTask];
+      StorageService.saveTasks(newTasks);
+      return newTasks;
     });
     return true;
-  };
+  }, []);
 
-  const computeTaskUpdates = (task: Task, updates: Partial<Task>): Task => {
-    const updatedTask = {
-      ...task,
-      ...updates,
-      updatedAt: new Date().toISOString(),
-    };
-
-    const taskDueDate = updatedTask.dueDate
-      ? format(
-          new Date(
-            Math.max(
-              new Date(updatedTask.taskDate).getTime(),
-              new Date(updatedTask.dueDate).getTime(),
-            ),
-          ),
-          'yyyy-MM-dd',
-        )
-      : '';
-
-    updatedTask.dueDate = taskDueDate;
-    updatedTask.status = getTaskStatus(updatedTask);
-
-    return updatedTask;
-  };
-
-  const updateTask = (taskId: string, updates: Partial<Task>) => {
+  const updateTask = useCallback((taskId: string, updates: Partial<Task>) => {
     try {
-      setTasks((prev) => {
-        if (!prev.some((task) => task.id === taskId)) {
-          return prev;
+      setTasks((prevTasks) => {
+        const taskIndex = prevTasks.findIndex((task) => task.id === taskId);
+        if (taskIndex === -1) return prevTasks;
+
+        const newTasks = [...prevTasks];
+        const currentTask = newTasks[taskIndex];
+
+        const updatedTask = {
+          ...currentTask,
+          ...updates,
+          updatedAt: new Date().toISOString(),
+        };
+
+        if (updatedTask.dueDate && updatedTask.taskDate) {
+          updatedTask.dueDate = format(
+            new Date(
+              Math.max(
+                new Date(updatedTask.taskDate).getTime(),
+                new Date(updatedTask.dueDate).getTime(),
+              ),
+            ),
+            'yyyy-MM-dd',
+          );
         }
 
-        const newTaskList = prev.map((task) =>
-          task.id === taskId ? computeTaskUpdates(task, updates) : task,
-        );
+        updatedTask.status = getTaskStatus(updatedTask);
+        newTasks[taskIndex] = updatedTask;
 
-        StorageService.saveTasks(newTaskList);
-        return newTaskList;
+        StorageService.saveTasks(newTasks);
+        return newTasks;
       });
     } catch (error) {
       console.error('Failed to update task:', error);
     }
-  };
+  }, []);
 
-  const deleteTask = (taskId: string) => {
-    setTasks((prev) => {
-      const newTaskList = prev.filter((task) => task.id !== taskId);
-      StorageService.saveTasks(newTaskList);
-      return newTaskList;
+  const deleteTask = useCallback((taskId: string) => {
+    setTasks((prevTasks) => {
+      const newTasks = prevTasks.filter((task) => task.id !== taskId);
+      StorageService.saveTasks(newTasks);
+      return newTasks;
     });
-  };
+  }, []);
 
-  const toggleDarkMode = () => {
-    setIsDarkMode(!isDarkMode);
-    StorageService.saveTheme(!isDarkMode);
-  };
+  const toggleDarkMode = useCallback(() => {
+    setIsDarkMode((prev) => {
+      const newValue = !prev;
+      StorageService.saveTheme(newValue);
+      return newValue;
+    });
+  }, []);
+
+  const filteredTasks = useMemo(() => {
+    let result = [...tasks];
+
+    if (searchTerm) {
+      const term = searchTerm.toLowerCase();
+      result = result.filter(
+        (task) =>
+          task.title.toLowerCase().includes(term) ||
+          task.description.toLowerCase().includes(term),
+      );
+    }
+
+    if (filters.status?.length) {
+      result = result.filter((task) => filters.status?.includes(task.status));
+    }
+
+    if (filters.priority?.length) {
+      result = result.filter((task) =>
+        filters.priority?.includes(task.priority),
+      );
+    }
+
+    return result;
+  }, [tasks, searchTerm, filters]);
 
   return {
     tasks: filteredTasks,

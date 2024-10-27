@@ -1,14 +1,67 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { Theme } from '../types';
 import { StatusLegend } from './StatusLegend';
+import { format } from 'date-fns';
 
 interface ShortcutProps {
   theme: Theme;
+  handlePeriodChange: (direction: 'next' | 'prev') => void;
+  handleAddTask: (date: string) => void;
+  setTaskDetails: React.Dispatch<React.SetStateAction<any>>;
+  toggleDarkMode: () => void;
 }
 
-const KeyboardShortcuts: React.FC<ShortcutProps> = ({ theme }) => {
+const KeyboardShortcuts: React.FC<ShortcutProps> = ({
+  theme,
+  handlePeriodChange,
+  handleAddTask,
+  setTaskDetails,
+  toggleDarkMode,
+}) => {
   const { background, border, isDarkMode } = theme;
   const [isOpen, setIsOpen] = useState(false);
+
+  useEffect(() => {
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if (e.altKey) {
+        switch (e.code) {
+          case 'ArrowRight':
+            e.preventDefault();
+            handlePeriodChange('next');
+            break;
+          case 'ArrowLeft':
+            e.preventDefault();
+            handlePeriodChange('prev');
+            break;
+          case 'KeyV':
+            e.preventDefault();
+            setTaskDetails((prev: { isMonthView: any }) => ({
+              ...prev,
+              isMonthView: !prev.isMonthView,
+            }));
+            break;
+          case 'KeyT':
+            e.preventDefault();
+            setTaskDetails((prev: any) => ({
+              ...prev,
+              currentDate: new Date(),
+            }));
+            break;
+          case 'KeyN':
+            e.preventDefault();
+            handleAddTask(format(new Date(), 'yyyy-MM-dd'));
+            break;
+          case 'KeyD':
+            e.preventDefault();
+            toggleDarkMode();
+            break;
+        }
+      }
+    };
+
+    window.addEventListener('keydown', handleKeyDown);
+    return () => window.removeEventListener('keydown', handleKeyDown);
+  }, [handlePeriodChange, handleAddTask, toggleDarkMode]);
 
   const shortcuts = [
     { key: 'Alt + →', description: 'Next period' },
@@ -20,7 +73,7 @@ const KeyboardShortcuts: React.FC<ShortcutProps> = ({ theme }) => {
   ];
 
   return (
-    <div className="fixed bottom-4 right-4 z-50 flex align-items-center">
+    <div className="fixed bottom-4 right-4 z-50 flex items-center">
       <StatusLegend isDarkMode={isDarkMode} />
       <button
         onClick={() => setIsOpen(!isOpen)}
@@ -29,6 +82,7 @@ const KeyboardShortcuts: React.FC<ShortcutProps> = ({ theme }) => {
           ${background} ${border}
           hover:opacity-80 transition-opacity
           flex items-center gap-2
+          h-fit
         `}
         aria-expanded={isOpen}
         aria-controls="shortcut-list"

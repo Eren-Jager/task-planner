@@ -9,7 +9,7 @@ import {
   isSameDay,
 } from 'date-fns';
 import { Task, Theme } from '../../types';
-import { getStatusClasses } from '../../utils/utils';
+import { getPriorityClasses, getStatusClasses } from '../../utils/utils';
 
 interface CalendarViewProps {
   currentDate: Date;
@@ -127,13 +127,7 @@ const MonthView: React.FC<CalendarViewProps> = ({
                   className={`p-1 text-sm rounded cursor-pointer group ${getStatusClasses(
                     task.status,
                     theme.isDarkMode,
-                  )} border-l-4 ${
-                    task.priority === 'high'
-                      ? `border-red-500 ${theme.isDarkMode && 'border-red-400'}`
-                      : task.priority === 'medium'
-                        ? `border-yellow-500 ${theme.isDarkMode && 'border-yellow-400'}`
-                        : `border-green-500 ${theme.isDarkMode && 'border-green-400'}`
-                  } hover:opacity-80 transition-opacity`}
+                  )} border-l-4 ${getPriorityClasses(task.priority, theme.isDarkMode)} hover:opacity-80 transition-opacity`}
                   aria-label={`${task.title}, Priority: ${task.priority}, Status: ${task.status}`}
                 >
                   <div className="flex items-center gap-1">
